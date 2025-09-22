@@ -4,13 +4,13 @@ import React, {
   useEffect,
   useCallback,
   useRef,
-} from 'react'
-import * as R from 'ramda'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { debounce } from 'throttle-debounce'
-import Drawer from 'react-modern-drawer'
-import 'react-modern-drawer/dist/index.css'
+} from 'react';
+import * as R from 'ramda';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { debounce } from 'throttle-debounce';
+import Drawer from 'react-modern-drawer';
+import 'react-modern-drawer/dist/index.css';
 import {
   Divider,
   Form,
@@ -22,20 +22,21 @@ import {
   Accordion,
   Dropdown,
   Button,
-} from 'semantic-ui-react'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
-import { profile_settings, settings_general } from './settings-options'
+} from 'semantic-ui-react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { profile_settings, settings_general } from './settings-options';
 import {
   updateSettings,
   doShowSettings,
   filterProfileSettings,
   resetSettings,
-} from 'actions/commonActions'
+} from '@/actions/commonActions';
 
-import CustomSlider from '../components/CustomSlider'
-import { makeRequest } from 'actions/directionsActions'
-import { makeIsochronesRequest } from 'actions/isochronesActions'
-import { Checkbox } from 'components/Checkbox'
+import CustomSlider from '../components/CustomSlider';
+import { makeRequest } from '@/actions/directionsActions';
+import { makeIsochronesRequest } from '@/actions/isochronesActions';
+import { Checkbox } from '@/components/Checkbox';
+import type { RootState } from '@/store';
 
 const SettingsPanel = ({
   dispatch,
@@ -44,24 +45,24 @@ const SettingsPanel = ({
   showSettings,
   activeTab,
 }) => {
-  const [generalSettings, setGeneralSettings] = useState({})
-  const [extraSettings, setExtraSettings] = useState({})
-  const [directionsSettings, setDirectionsSettings] = useState({})
-  const [copied, setCopied] = useState(false)
+  const [generalSettings, setGeneralSettings] = useState({});
+  const [extraSettings, setExtraSettings] = useState({});
+  const [directionsSettings, setDirectionsSettings] = useState({});
+  const [copied, setCopied] = useState(false);
 
-  const prevPropsRef = useRef()
+  const prevPropsRef = useRef();
 
   const handleUpdateSettings = useCallback(
-    debounce(100, ({ name, value }) => {
+    debounce(300, ({ name, value }) => {
       dispatch(
         updateSettings({
           name,
           value,
         })
-      )
+      );
     }),
     [dispatch]
-  )
+  );
 
   useEffect(() => {
     if (
@@ -69,24 +70,24 @@ const SettingsPanel = ({
       !R.equals(profile, prevPropsRef.current.profile)
     ) {
       setGeneralSettings((prev) => {
-        const newSettings = { ...prev }
-        Object.keys(newSettings).forEach((v) => (newSettings[v] = false))
-        return newSettings
-      })
+        const newSettings = { ...prev };
+        Object.keys(newSettings).forEach((v) => (newSettings[v] = false));
+        return newSettings;
+      });
 
       setExtraSettings((prev) => {
-        const newSettings = { ...prev }
-        Object.keys(newSettings).forEach((v) => (newSettings[v] = false))
-        return newSettings
-      })
+        const newSettings = { ...prev };
+        Object.keys(newSettings).forEach((v) => (newSettings[v] = false));
+        return newSettings;
+      });
 
       setDirectionsSettings((prev) => {
-        const newSettings = { ...prev }
-        Object.keys(newSettings).forEach((v) => (newSettings[v] = false))
-        return newSettings
-      })
+        const newSettings = { ...prev };
+        Object.keys(newSettings).forEach((v) => (newSettings[v] = false));
+        return newSettings;
+      });
     }
-  }, [profile])
+  }, [profile]);
 
   useEffect(() => {
     if (
@@ -95,63 +96,63 @@ const SettingsPanel = ({
       !R.equals(settings, prevPropsRef.current.settings)
     ) {
       if (activeTab === 0) {
-        dispatch(makeRequest())
+        dispatch(makeRequest());
       } else {
-        dispatch(makeIsochronesRequest())
+        dispatch(makeIsochronesRequest());
       }
     }
-  }, [settings, profile, activeTab, dispatch])
+  }, [settings, profile, activeTab, dispatch]);
 
   useEffect(() => {
-    prevPropsRef.current = { profile, settings, showSettings, activeTab }
-  })
+    prevPropsRef.current = { profile, settings, showSettings, activeTab };
+  });
 
   const handleShowSettings = useCallback((settingsType, i) => {
     const setterMap = {
       generalSettings: setGeneralSettings,
       extraSettings: setExtraSettings,
       directionsSettings: setDirectionsSettings,
-    }
+    };
 
-    const setter = setterMap[settingsType]
+    const setter = setterMap[settingsType];
     if (setter) {
       setter((prev) => ({
         ...prev,
         [i]: !prev[i],
-      }))
+      }));
     }
-  }, [])
+  }, []);
 
   const handleColorCopy = useCallback(() => {
-    setCopied(true)
+    setCopied(true);
     setTimeout(() => {
-      setCopied(false)
-    }, 1000)
-  }, [])
+      setCopied(false);
+    }, 1000);
+  }, []);
 
   const handleBikeTypeChange = useCallback(
     (e, data) => {
-      const { value, name } = data
+      const { value, name } = data;
       dispatch(
         updateSettings({
           name,
           value,
         })
-      )
+      );
     },
     [dispatch]
-  )
+  );
 
   const resetConfigSettings = useCallback(() => {
-    dispatch(resetSettings())
-  }, [dispatch])
+    dispatch(resetSettings());
+  }, [dispatch]);
 
   const extractSettings = useCallback((profileParam, settingsParam) => {
-    return JSON.stringify(filterProfileSettings(profileParam, settingsParam))
-  }, [])
+    return JSON.stringify(filterProfileSettings(profileParam, settingsParam));
+  }, []);
 
-  const no_profile_settings = profile_settings[profile].boolean.length === 0
-  const width = no_profile_settings ? 200 : 400
+  const no_profile_settings = profile_settings[profile].boolean.length === 0;
+  const width = no_profile_settings ? 200 : 400;
 
   return (
     <Drawer
@@ -170,7 +171,7 @@ const SettingsPanel = ({
           <Grid.Row>
             {!no_profile_settings && (
               <Grid.Column width={8}>
-                <Form size={'small'}>
+                <Form size="small">
                   <Header as="h4">Extra Settings</Header>
                   {profile_settings[profile].numeric.map((option, key) => (
                     <Fragment key={key}>
@@ -194,7 +195,7 @@ const SettingsPanel = ({
                         >
                           <Popup
                             content={option.description}
-                            size={'tiny'}
+                            size="tiny"
                             trigger={<Icon color="grey" name="help circle" />}
                           />
                         </div>
@@ -203,7 +204,6 @@ const SettingsPanel = ({
                         <CustomSlider
                           key={key}
                           option={option}
-                          dispatch={dispatch}
                           settings={settings}
                           profile={profile}
                           handleUpdateSettings={handleUpdateSettings}
@@ -228,12 +228,12 @@ const SettingsPanel = ({
                           >
                             <Popup
                               content={option.description}
-                              size={'tiny'}
+                              size="tiny"
                               trigger={<Icon color="grey" name="help circle" />}
                             />
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </Fragment>
                   <Divider />
@@ -247,7 +247,7 @@ const SettingsPanel = ({
                             onChange={handleBikeTypeChange}
                             value={settings.bicycle_type}
                             selection
-                            name={'bicycle_type'}
+                            name="bicycle_type"
                             options={option.enums}
                           />
 
@@ -258,20 +258,20 @@ const SettingsPanel = ({
                           >
                             <Popup
                               content={option.description}
-                              size={'tiny'}
+                              size="tiny"
                               trigger={<Icon color="grey" name="help circle" />}
                             />
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </Fragment>
                 </Form>
               </Grid.Column>
             )}
             <Grid.Column width={no_profile_settings ? 16 : 8}>
-              <Form size={'small'}>
-                <div className={'flex flex-row justify-between'}>
+              <Form size="small">
+                <div className="flex flex-row justify-between">
                   <Header as="h4">General Settings</Header>
                   <Button icon onClick={() => dispatch(doShowSettings())}>
                     <Icon name="close" />
@@ -302,7 +302,7 @@ const SettingsPanel = ({
                         >
                           <Popup
                             content={option.description}
-                            size={'tiny'}
+                            size="tiny"
                             trigger={<Icon color="grey" name="help circle" />}
                           />
                         </div>
@@ -311,7 +311,6 @@ const SettingsPanel = ({
                         <CustomSlider
                           key={key}
                           option={option}
-                          dispatch={dispatch}
                           settings={settings}
                           profile={profile}
                           handleUpdateSettings={handleUpdateSettings}
@@ -337,12 +336,12 @@ const SettingsPanel = ({
                       >
                         <Popup
                           content={option.description}
-                          size={'tiny'}
+                          size="tiny"
                           trigger={<Icon color="grey" name="help circle" />}
                         />
                       </div>
                     </div>
-                  )
+                  );
                 })}
                 {settings_general.all.boolean.map((option, key) => {
                   return (
@@ -360,12 +359,12 @@ const SettingsPanel = ({
                       >
                         <Popup
                           content={option.description}
-                          size={'tiny'}
+                          size="tiny"
                           trigger={<Icon color="grey" name="help circle" />}
                         />
                       </div>
                     </div>
-                  )
+                  );
                 })}
                 {settings_general.all.numeric.map((option, key) => {
                   return (
@@ -392,7 +391,7 @@ const SettingsPanel = ({
                         >
                           <Popup
                             content={option.description}
-                            size={'tiny'}
+                            size="tiny"
                             trigger={<Icon color="grey" name="help circle" />}
                           />
                         </div>
@@ -401,14 +400,13 @@ const SettingsPanel = ({
                         <CustomSlider
                           key={key}
                           option={option}
-                          dispatch={dispatch}
                           settings={settings}
                           profile={profile}
                           handleUpdateSettings={handleUpdateSettings}
                         />
                       ) : null}
                     </Fragment>
-                  )
+                  );
                 })}
               </Form>
             </Grid.Column>
@@ -445,8 +443,8 @@ const SettingsPanel = ({
         </Grid>
       </Segment>
     </Drawer>
-  )
-}
+  );
+};
 
 SettingsPanel.propTypes = {
   id: PropTypes.number,
@@ -457,7 +455,7 @@ SettingsPanel.propTypes = {
   settings: PropTypes.object,
   showSettings: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,
-}
+};
 
 const MemoizedSettingsPanel = React.memo(
   SettingsPanel,
@@ -467,19 +465,19 @@ const MemoizedSettingsPanel = React.memo(
       R.equals(prevProps.profile, nextProps.profile) &&
       R.equals(prevProps.showSettings, nextProps.showSettings) &&
       R.equals(prevProps.activeTab, nextProps.activeTab)
-    )
+    );
   }
-)
+);
 
-const mapStateToProps = (state) => {
-  const { message, profile, settings, activeTab, showSettings } = state.common
+const mapStateToProps = (state: RootState) => {
+  const { message, profile, settings, activeTab, showSettings } = state.common;
   return {
     showSettings,
     message,
     profile,
     settings,
     activeTab,
-  }
-}
+  };
+};
 
-export default connect(mapStateToProps)(MemoizedSettingsPanel)
+export default connect(mapStateToProps)(MemoizedSettingsPanel);

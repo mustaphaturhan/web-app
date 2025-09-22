@@ -1,36 +1,42 @@
-import React, { useState, useCallback, useMemo } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { Search, Icon, Label, Popup } from 'semantic-ui-react'
+import React, { useState, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { Search, Icon, Label, Popup } from 'semantic-ui-react';
 import {
   doRemoveWaypoint,
   updateTextInput,
   fetchGeocode,
   makeRequest,
   isWaypoint,
-} from 'actions/directionsActions'
+} from '@/actions/directionsActions';
 
-import { zoomTo } from 'actions/commonActions'
-import { isValidCoordinates } from 'utils/geom'
+import { zoomTo } from '@/actions/commonActions';
+import { isValidCoordinates } from '@/utils/geom';
 
-import { debounce } from 'throttle-debounce'
+import { debounce } from 'throttle-debounce';
+import type { RootState } from '@/store';
 
 const Waypoint = ({
-  id,
   index,
   dispatch,
   userInput,
   isFetching,
-  results,
   use_geocoding,
   geocodeResults,
+}: {
+  index: number;
+  dispatch: any;
+  userInput: string;
+  isFetching: boolean;
+  use_geocoding: boolean;
+  geocodeResults: any[];
 }) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const fetchGeocodeResults = useMemo(
     () =>
       debounce(0, (e) => {
-        setOpen(true)
+        setOpen(true);
 
         if (userInput.length > 0 && e === 'Enter') {
           // make results visible
@@ -40,13 +46,13 @@ const Waypoint = ({
                 inputValue: userInput,
                 index: index,
               })
-            )
+            );
           } else {
-            const coords = userInput.split(/[\s,;]+/)
+            const coords = userInput.split(/[\s,;]+/);
             // is this a coordinate?
             if (coords.length === 2) {
-              const lat = coords[1]
-              const lng = coords[0]
+              const lat = coords[1];
+              const lng = coords[0];
               if (isValidCoordinates(lat, lng)) {
                 dispatch(
                   fetchGeocode({
@@ -54,14 +60,14 @@ const Waypoint = ({
                     index: index,
                     lngLat: [parseFloat(lng), parseFloat(lat)],
                   })
-                )
+                );
               }
             }
           }
         }
       }),
     [dispatch, index, userInput, use_geocoding]
-  )
+  );
 
   const handleSearchChange = useCallback(
     (event) => {
@@ -70,27 +76,27 @@ const Waypoint = ({
           inputValue: event.target.value,
           index: index,
         })
-      )
-      dispatch(isWaypoint(index))
+      );
+      dispatch(isWaypoint(index));
     },
     [dispatch, index]
-  )
+  );
 
   const handleResultSelect = useCallback(
     (e, { result }) => {
-      setOpen(false)
-      dispatch(zoomTo([[result.addresslnglat[1], result.addresslnglat[0]]]))
+      setOpen(false);
+      dispatch(zoomTo([[result.addresslnglat[1], result.addresslnglat[0]]]));
       dispatch(
         updateTextInput({
           inputValue: result.title,
           index: index,
           addressindex: result.addressindex,
         })
-      )
-      dispatch(makeRequest())
+      );
+      dispatch(makeRequest());
     },
     [dispatch, index]
-  )
+  );
 
   const resultRenderer = useCallback(
     ({ title, description }) => (
@@ -111,14 +117,14 @@ const Waypoint = ({
       </div>
     ),
     []
-  )
+  );
 
   return (
     <React.Fragment>
       <div className="flex flex-row justify-between items-center">
         <Popup
-          content={'Re-shuffle this waypoint'}
-          size={'tiny'}
+          content="Re-shuffle this waypoint"
+          size="tiny"
           trigger={
             <Label basic size="small">
               <Icon name="ellipsis vertical" />
@@ -150,7 +156,7 @@ const Waypoint = ({
               results={geocodeResults}
               value={userInput}
               onKeyPress={(event) => {
-                fetchGeocodeResults(event.key)
+                fetchGeocodeResults(event.key);
               }}
               placeholder="Hit enter for search..."
               data-testid={'waypoint-input-' + index}
@@ -162,7 +168,7 @@ const Waypoint = ({
             content={
               use_geocoding ? 'Search for address' : 'Enter Lon/lat coordinates'
             }
-            size={'tiny'}
+            size="tiny"
             trigger={
               <Icon
                 className="pointer"
@@ -177,8 +183,8 @@ const Waypoint = ({
         </div>
         <div style={{ margin: '3px' }}>
           <Popup
-            content={'Remove this waypoint'}
-            size={'tiny'}
+            content="Remove this waypoint"
+            size="tiny"
             trigger={
               <Icon
                 className="pointer"
@@ -192,8 +198,8 @@ const Waypoint = ({
         </div>
       </div>
     </React.Fragment>
-  )
-}
+  );
+};
 
 Waypoint.propTypes = {
   id: PropTypes.string,
@@ -204,18 +210,18 @@ Waypoint.propTypes = {
   results: PropTypes.array,
   use_geocoding: PropTypes.bool,
   geocodeResults: PropTypes.array,
-}
+};
 
-const mapStateToProps = (state, ownProps) => {
-  const { index } = ownProps
-  const waypoint = state.directions.waypoints[index]
-  const { geocodeResults, userInput, isFetching } = waypoint
-  const { use_geocoding } = state.common.settings
+const mapStateToProps = (state: RootState, ownProps: { index: number }) => {
+  const { index } = ownProps;
+  const waypoint = state.directions.waypoints[index];
+  const { geocodeResults, userInput, isFetching } = waypoint;
+  const { use_geocoding } = state.common.settings;
   return {
     userInput,
     geocodeResults,
     isFetching,
     use_geocoding,
-  }
-}
-export default connect(mapStateToProps)(Waypoint)
+  };
+};
+export default connect(mapStateToProps)(Waypoint);
